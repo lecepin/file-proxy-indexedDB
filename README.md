@@ -2,7 +2,7 @@
 
 使用 ServiceWorker 实现本地图片映射到 IndexedDB 进行读取操作。
 
-[演示地址](https://lecepin.github.io/file-to-indexedDB)
+[演示地址](https://lecepin.github.io/file-proxy-indexedDB/)
 
 ![image](https://user-images.githubusercontent.com/11046969/155058297-34e7be93-76d1-44bd-b3c8-28835471a338.png)
 
