@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>图片映射到 IndexedDB 演示 - lecepin</title>
+  </head>
+  <body>
+    <h1>图片映射到 IndexedDB 演示</h1>
+    <p>拖拽 或者 粘贴 图片到这里~</p>
+    <img style="max-width: 50%" id="preview" />
+    <ol id="upload_list"></ol>
+
+    <script>
+      navigator.serviceWorker.register("./sw.js");
+      if (navigator.serviceWorker.controller) {
+        getUploads().then(renderUploads);
+      }
+
+      document.addEventListener("paste", pasteToUpload);
+      document.addEventListener("drop", dropToUpload);
+      document.ondragover = (e) => {
+        e.preventDefault();
+      };
+      document
+        .getElementById("upload_list")
+        .addEventListener("click", function (e) {
+          removeUploadsImg(e, () => getUploads().then(renderUploads));
+        });
+
+      function pasteToUpload({ clipboardData: { items } }) {
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf("image") !== -1) {
+            uploadImg(items[i].getAsFile()).then((data) => {
+              renderUploadImg(data);
+              getUploads().then(renderUploads);
+            });
+
+            break;
+          }
+        }
+      }
+
+      function dropToUpload(e) {
+        e.preventDefault();
+        const file = e.dataTransfer.files[0];
+
+        if (file && file.type.indexOf("image/") > -1) {
+          uploadImg(file).then((data) => {
+            renderUploadImg(data);
+            getUploads().then(renderUploads);
+          });
+        }
+      }
+
+      function uploadImg(file) {
+        const data = new FormData();
+
+        event.preventDefault();
+        data.append("img", file);
+
+        return fetch("./update-img", {
+          method: "post",
+          body: data,
+        }).then((data) => data.json());
+      }
+
+      function renderUploadImg(data) {
+        const preview = document.getElementById("preview");
+
+        preview.src = data.name;
+      }
+
+      function getUploads() {
+        return fetch("get-uploads.json").then((data) => data.json());
+      }
+
+      function renderUploads(data) {
+        const upload_list = document.getElementById("upload_list");
+        let items = "";
+
+        if (data.length) {
+          items = "<h3>已上传到 IndexedDB图片</h3>";
+        }
+
+        data.map(
+          (item) =>
+            (items += `<li>
+                        <a href="${item.name}.dbimg">${item.name}</a>
+                        <button data-id="${item.id}">删除</button>
+                      </li>`)
+        );
+
+        upload_list.innerHTML = items;
+      }
+
+      function removeUploadsImg(e, callback) {
+        const id = e.target.dataset.id;
+        if (!id) {
+          return;
+        }
+
+        return fetch(`remove-uploads-img?id=${id}`, { method: "DELETE" }).then(
+          callback
+        );
+      }
+    </script>
+  </body>
+</html>
