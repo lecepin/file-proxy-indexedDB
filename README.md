@@ -1,4 +1,4 @@
-# file-to-indexedDB
+# file-proxy-indexedDB
 
 使用 ServiceWorker 实现本地图片映射到 IndexedDB 进行读取操作。
 
