@@ -1,0 +1,2 @@
+# file-to-indexedDB
+使用ServiceWorker实现本地图片映射到IndexedDB进行读取操作
